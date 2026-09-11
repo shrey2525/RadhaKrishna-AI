@@ -1,0 +1,51 @@
+{
+  "config": {
+    "n_contexts": 8,
+    "n_actions": 4,
+    "n_regimes": 4,
+    "obs_noise": 0.1,
+    "regime_change_prob": 0.03,
+    "episode_length": 500,
+    "train_episodes": 500,
+    "eval_episodes": 100,
+    "context_window": 20,
+    "hidden_size": 64,
+    "transformer_layers": 2,
+    "transformer_heads": 4,
+    "batch_size": 32,
+    "epochs": 20,
+    "learning_rate": 0.0003,
+    "adaptation_window": 20,
+    "recovery_fraction": 0.9,
+    "seed": 42
+  },
+  "device": "cpu",
+  "final_training_losses": {
+    "stateless": 1.3859746009111404,
+    "transformer": 1.2934599444270134,
+    "gru": 1.2802089527249336
+  },
+  "evaluation": {
+    "stateless": {
+      "mean_reward": 0.17258000142872335,
+      "std_reward": 0.022042313640150888,
+      "total_regime_changes": 1426,
+      "recovered_changes": 0,
+      "mean_adaptation_time": null
+    },
+    "transformer": {
+      "mean_reward": 0.3080599984526634,
+      "std_reward": 0.07722251181995732,
+      "total_regime_changes": 1508,
+      "recovered_changes": 526,
+      "mean_adaptation_time": 133.20087974890606
+    },
+    "gru": {
+      "mean_reward": 0.2831000002846122,
+      "std_reward": 0.1140369679788552,
+      "total_regime_changes": 1463,
+      "recovered_changes": 0,
+      "mean_adaptation_time": null
+    }
+  }
+}
