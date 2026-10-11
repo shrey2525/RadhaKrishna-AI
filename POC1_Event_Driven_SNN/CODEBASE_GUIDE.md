@@ -26,7 +26,7 @@ synthetic labeled sequences --> train ANN and SNN --> save model weights
                                   CSV/JSON results --> console and dashboard
 ```
 
-The current train-and-evaluate scripts use `SyntheticTemporalDataset` directly. The separate event adapter, delta encoder, and hardware backend files are extension points; they are not part of this experiment's active path.
+The ANN/SNN train-and-evaluate scripts use `SyntheticTemporalDataset` directly. A separate optional Codex hook collector now records privacy-minimized local tool/session metadata; it does not change the synthetic classifier's training data or pretend the synthetic weights are a telemetry model. The delta encoder and hardware backend remain extension points and are not part of the benchmark's active path.
 
 ## Folder and file guide
 
@@ -47,6 +47,9 @@ The current train-and-evaluate scripts use `SyntheticTemporalDataset` directly. 
 | `experiments/sparsity_sweep.py` | Loads the trained weights, tests all configured event densities, and saves the metric table. |
 | `experiments/evaluate.py` | Reads and prints the saved CSV; it does not run model inference itself. |
 | `visualization/dashboard.py` | Displays charts and the results table using Streamlit. |
+| `codex_telemetry/` | Normalizes local Codex lifecycle hook events, maps them to fixed-width event features, and writes privacy-minimized JSONL. |
+| `experiments/report_codex_telemetry.py` | Summarizes locally captured Codex event counts, tool categories, and explicit outcome status. |
+| `.codex/hooks.json` (workspace root) | Registers session and tool hooks that invoke the POC telemetry collector after Codex reviews/trusts the project hook. |
 | `hardware/backend.py` | Abstract interface for a future hardware backend; it contains no concrete hardware implementation. |
 | `tests/` | Small checks for dataset shape, delta encoding, and SNN output shape. |
 | `results/latest/` | Default location for trained weights, metadata, and sweep results. |
@@ -96,6 +99,18 @@ streamlit run visualization/dashboard.py
 ```
 
 The dashboard reads `results/latest/sparsity_results.csv` and shows compute-reduction, accuracy, and efficiency-ratio charts. It currently uses that fixed results path.
+
+## Optional: live Codex hook telemetry
+
+The workspace root contains `.codex/hooks.json`, which registers `SessionStart`, `PreToolUse`, `PostToolUse`, and `SessionEnd` handlers. Codex supplies each handler a JSON object on standard input. The collector hashes session/turn/tool-call IDs, categorizes tool names, counts input/output bytes, and keeps only explicit machine-readable outcome flags. It discards prompt text, command text, tool output, transcript paths, and working-directory paths. Events are appended to `results/live/codex_events.jsonl`, which is ignored by Git.
+
+Codex requires project-local hooks to be reviewed and trusted before they can run. Review the pending hook in Codex's `/hooks` interface, then reopen or restart a session in this repository. After using Codex, summarize the captured events with:
+
+```bash
+python experiments/report_codex_telemetry.py
+```
+
+The adapter also maps each safe record to a 32-value vector. The existing `ann.pt` and `snn.pt` weights are trained for the synthetic class-pattern task; using them to make claims about Codex telemetry would be invalid. Training or evaluating a telemetry-specific model requires a defined label and enough real captured examples. Current tests use representative hook-shaped fixture events to verify ingestion, redaction, feature width, and reporting without needing a live session.
 
 ## What the result columns mean
 
