@@ -1,0 +1,20 @@
+seed: 42
+data:
+  input_dim: 16
+  n_classes: 4
+  sequence_length: 100
+  memory_gap: 50
+  distractor_probability: 0.15
+  train_samples: 5000
+  test_samples: 1500
+model:
+  hidden_dim: 64
+  memory_dim: 32
+  tau_fast: 0.85
+  tau_slow: 0.995
+training:
+  epochs: 15
+  batch_size: 128
+  learning_rate: 0.001
+benchmark:
+  gaps: [10, 25, 50, 100, 250, 500]
